@@ -2,11 +2,12 @@ from scipy.stats import shapiro
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 df = pd.read_csv('Drugs.csv')
 
 #questao(1)
-
+#nota: melhorar código, da pra resumir bastante
 porc_dados_faltando = df.isnull().sum()/len(df['ID'])*100
 print(porc_dados_faltando)
 
@@ -43,7 +44,7 @@ df.loc[(df['Country'] == "Other") & (df['Income (USD)'].isnull()), 'Income (USD)
 
 #2) preencher Nscore, Escore, Oscore, ... com a média
 #   ao analisar a descrição dessas características com o describe() e a distribuição com o value_counts() , nota-se que não há grandes outliers, portanto usar a média é a melhor opção para preencher os dados restantes
-  
+
 df.loc[df['Nscore'].isnull(), 'Nscore'] = df['Nscore'].mean();  df.loc[df['Escore'].isnull(), 'Escore'] = df['Escore'].mean()
 df.loc[df['Oscore'].isnull(), 'Oscore'] = df['Oscore'].mean();  df.loc[df['AScore'].isnull(), 'AScore'] = df['AScore'].mean()
 df.loc[df['Cscore'].isnull(), 'Cscore'] = df['Cscore'].mean();  df.loc[df['SS'].isnull(), 'SS'] = df['SS'].mean()
@@ -53,128 +54,85 @@ df['Impulsive'] = pd.to_numeric(df['Impulsive'], errors='coerce'); df.loc[df['Im
 porc_dados_faltando = df.isnull().sum()/len(df['ID'])*100
 print(porc_dados_faltando)
 
-#questao(2)
+#questao (2) (3) (4) (10) (12) e (13)
 
 # grafico de distribuição de idade na amostra
 df['Age'].value_counts().plot(kind = "bar", title = "DISTRIBUIÇÃO DAS IDADES" , xlabel = "FAIXA ETÁRIA", ylabel = "QUANTIDADE")
 plt.savefig('distribuicaoidades.png')
 plt.clf()
 
-# analise da o consumo da droga feita pela porcentagem de consumo de cada faixa_etária para determinar qual faixa-etária usa mais
-def analise_consumo(dataframe, droga):
-
-    nome_droga = droga
-    print("\n---------------------------------", droga, "---------------------------------\n")
-
-    total_idade = df['Age'].value_counts().sort_index() 
-
-    lista_pares_das_porcentagens_CL6 = []
-    lista_pares_das_porcentagens_CL5 = []
-    lista_pares_das_porcentagens_CL4 = []
-
-    idades_unicas = sorted(df['Age'].unique(), key=lambda x: str(x))  # pego as faixas_etárias únicas como strings
-
-    for idade in idades_unicas:  # para cada idade única, eu calcúlo a porcentagem de usuários CL6, CL5 e CL4 daquela droga e armazeno na lista como um par(porcentagem, "faixa-etária")
-
-        max_idade = df.loc[(df[droga] == 'CL6') & (df['Age'] == idade), 'Age'].count()
-        max_idade2 = df.loc[(df[droga] == 'CL5') & (df['Age'] == idade), 'Age'].count()
-        max_idade3 = df.loc[(df[droga] == 'CL4') & (df['Age'] == idade), 'Age'].count()
-
-        total_pessoas_idade = total_idade.get(idade, 1) 
-
-        porcentagem = (max_idade / total_pessoas_idade) * 100
-        porcentagem2 = (max_idade2 / total_pessoas_idade) * 100
-        porcentagem3 = (max_idade3 / total_pessoas_idade) * 100
-
-        lista_pares_das_porcentagens_CL6.append((porcentagem, idade))
-        lista_pares_das_porcentagens_CL5.append((porcentagem2, idade))
-        lista_pares_das_porcentagens_CL4.append((porcentagem3, idade))
-    
-    media_porcentagem_CL6 = 0; media_porcentagem_CL5 = 0; media_porcentagem_CL4 = 0
-
-    for i in range(6):
-        porcentagem1, idade1 = lista_pares_das_porcentagens_CL6[i]; porcentagem2, idade2 = lista_pares_das_porcentagens_CL5[i]; porcentagem3, idade3 = lista_pares_das_porcentagens_CL4[i]
-        media_porcentagem_CL6 += porcentagem1/6
-        media_porcentagem_CL5 += porcentagem2/6
-        media_porcentagem_CL4 += porcentagem3/6
-
-    print("CL6: ")  # mostro as idades com mais consumidores percentuais CL6
-    lista_pares_das_porcentagens_CL6.sort(reverse = True, key=lambda x: x[0])
-    porcentagem_1, idade_1 = lista_pares_das_porcentagens_CL6[0]
-    porcentagem_2, idade_2 = lista_pares_das_porcentagens_CL6[1]
-    print(f"1) Idade: {idade_1}, Porcentagem: {porcentagem_1:.2f}% 2) Idade: {idade_2}, Porcentagem: {porcentagem_2:.2f}% Média: {media_porcentagem_CL6:.2f}%")
-
-    print("CL5: ")  # mostro as idades com mais consumidores percentuais CL5
-    lista_pares_das_porcentagens_CL5.sort(reverse = True, key=lambda x: x[0])
-    porcentagem_1, idade_1 = lista_pares_das_porcentagens_CL5[0]
-    porcentagem_2, idade_2 = lista_pares_das_porcentagens_CL5[1]
-    print(f"1) Idade: {idade_1}, Porcentagem: {porcentagem_1:.2f}% 2) Idade: {idade_2}, Porcentagem: {porcentagem_2:.2f}%  Média: {media_porcentagem_CL5:.2f}%")
-
-    print("CL4: ")  # mostro as idades com mais consumidores percentuais CL4
-    lista_pares_das_porcentagens_CL4.sort(reverse = True, key=lambda x: x[0])
-    porcentagem, idade = lista_pares_das_porcentagens_CL4[0]
-    porcentagem_2, idade_2 = lista_pares_das_porcentagens_CL4[1]
-    print(f"1) Idade: {idade}, Porcentagem: {porcentagem:.2f}% 2) Idade: {idade_2}, Porcentagem: {porcentagem_2:.2f}% Média: {media_porcentagem_CL4:.2f}%")
-
-    # a partir da maior quantidade de usuários CL6, CL5 e CL4 e da média eu concluo se há uma grande diferença de consumo entre as faixas-etárias e, se houver, eu crio um gráfico para analisar melhor
-    return 
-
-analise_consumo(df, 'Alcohol');analise_consumo(df, 'Amphet');analise_consumo(df, 'Benzos');analise_consumo(df, 'Caff');analise_consumo(df, 'Cannabis');
-analise_consumo(df, 'Choc');analise_consumo(df, 'Coke');analise_consumo(df, 'Crack');analise_consumo(df, 'Ecstasy');analise_consumo(df, 'Heroin');
-analise_consumo(df, 'Ketamine');analise_consumo(df, 'Legalh');analise_consumo(df, 'LSD');analise_consumo(df, 'Meth');analise_consumo(df, 'Mushrooms');
-analise_consumo(df, 'Semer');analise_consumo(df, 'VSA')
-
-dataframe_sorted = df.sort_values(by = 'Cannabis', ascending = False)  # grtáfico de uso da cannabis
-imagem = sns.violinplot(data = dataframe_sorted, x = 'Age', y = 'Cannabis')
-plt.tight_layout()
-plt.xlabel('Faixa Etária')
-plt.ylabel('Quantidade de Pessoas CLX')
-plt.savefig("consumoporidadecannabis.png")
-plt.clf()
-
-dataframe_sorted = df.sort_values(by = 'Caff', ascending = False)   # gráfico de uso da cafeína
-imagem = sns.violinplot(data = dataframe_sorted, x = 'Age', y = 'Caff')
-plt.tight_layout()
-plt.xlabel('Faixa Etária')
-plt.ylabel('Quantidade de Pessoas CLX')
-plt.savefig("consumoporidadecafe.png")
-plt.clf()
-
-#questao (3)
-
-#questao (4)
-
 # funcao para pegar umca coluna e uma droga(exemplo: Gênero e Álcool) e calcular a média de consumo dessa coluna no dataframe
-def analise_coluna_droga(dataframe, coluna, droga):
+def analise_coluna_droga(dataframe, coluna, drogas):
 
-    print("--------------------", droga , "--------------------")
+    lista_analise = [] #lista utilizada para criar dataframe do gráfico, o qual receberá listas no formato [coluna, media, droga]
 
-    valores_unicos = sorted(dataframe[coluna].unique(), key = lambda x: str(x))
-    media = 0
-    for val in valores_unicos:
+    for droga in drogas:
+        print("--------------------", droga , "--------------------")
 
-        dfval = df.loc[(df[coluna] == val), [coluna, droga]]
-        totalval = df.loc[(df[coluna] == val), coluna].count()
+        #separação das médias e de cada string única na coluna a ser analisada
+        valores_unicos = sorted(dataframe[coluna].unique(), key = lambda x: str(x)) 
+        medias = []
+        media_total = 0
 
-        media = 0
+        for val in valores_unicos:
 
-        # escala de 0 a 6 para medir média de consumo da característica analisada
-        totalval_6 = dfval.loc[dfval[droga] == "CL6"].shape[0]
-        media += totalval_6*6
-        totalval_5 = dfval.loc[dfval[droga] == "CL5"].shape[0]
-        media += totalval_5*5
-        totalval_4 = dfval.loc[dfval[droga] == "CL4"].shape[0]
-        media += totalval_4*4
-        totalval_3 = dfval.loc[dfval[droga] == "CL3"].shape[0]
-        media += totalval_3*3
-        totalval_2 = dfval.loc[dfval[droga] == "CL2"].shape[0]
-        media += totalval_2*2
-        totalval_1 = dfval.loc[dfval[droga] == "CL1"].shape[0]
-        media += totalval_1*1
+            dfval = dataframe.loc[(df[coluna] == val), [coluna, droga]] #dataframe somente com a coluna e o consumo da droga(ex: dataframe com as colunas'Gender' e 'Alcohol')
+            totalval = dataframe.loc[(df[coluna] == val), coluna].count() #total de pessoas nessa coluna(ex: total de pessoas do genero feminino)
 
-        media = media/totalval
-        print(f"A MEDIA DE CONSUMO DE {val} é {media:.2f}\n" )
+            media = 0
 
+            # escala de 0 a 6 para medir média de consumo da característica analisada
+            totalval_6 = dfval.loc[dfval[droga] == "CL6"].shape[0]
+            media += totalval_6*6
+            totalval_5 = dfval.loc[dfval[droga] == "CL5"].shape[0]
+            media += totalval_5*5
+            totalval_4 = dfval.loc[dfval[droga] == "CL4"].shape[0]
+            media += totalval_4*4
+            totalval_3 = dfval.loc[dfval[droga] == "CL3"].shape[0]
+            media += totalval_3*3
+            totalval_2 = dfval.loc[dfval[droga] == "CL2"].shape[0]
+            media += totalval_2*2
+            totalval_1 = dfval.loc[dfval[droga] == "CL1"].shape[0]
+            media += totalval_1*1
+
+            media = media/totalval #como calculamos o 'totalval' baseado em cada valor único(ex: 'F' em 'Gender'), não há risco de divisão por zero
+            medias.append(media) #adicionamos a media aqui para calcular a media de todos os 'val' únicos na 'media_total'
+
+            print(f"A MEDIA DE CONSUMO DE {val} é {media:.2f}\n" )
+
+            lista_analise.append([val, media, droga])
+        
+        for val in medias:
+            media_total += val/len(medias) #se len(medias) for zero o loop nem é executado já que é 'for val in medias', logo sem risco de divisão por zero
+
+        print(f"MEDIA FINAL: {media_total:.2f}\n")
+
+    df_grafico = pd.DataFrame(lista_analise, columns = [coluna, 'Média', 'Droga'])
+    sns.barplot(data = df_grafico, x = 'Droga', y = 'Média', hue = coluna)
+    sns.title(f"Gráfico de consumo baseado na {coluna}")
+    plt.savefig(f"grafico_consumo_por_{coluna}.png")
+    plt.clf()
+    #grafico final da análise
+
+
+
+drogas = ['Alcohol', 'Amphet', 'Amyl', 'Benzos', 'Caff', 'Cannabis', 'Choc', 'Coke', 'Crack', 'Ecstasy', 'Heroin', 'Ketamine', 'Legalh', 'LSD', 'Meth', 'Mushrooms', 'Nicotine' ,'Semer', 'VSA']
 drogas_alucinogenas = ['LSD', 'Ecstasy', 'Ketamine', 'Cannabis' , 'Mushrooms']
-for droga in drogas_alucinogenas:
-    analise_coluna_droga(df, 'Gender', droga)
+drogas_ilicitas = ['Amphet', 'Amyl', 'Coke', 'Crack', 'Ecstasy', 'Heroin', 'Ketamine', 'Legalh', 'LSD', 'Meth', 'Mushrooms'] #de acordo com a legislação brasileira
+
+#analise para questao 2
+analise_coluna_droga(df, 'Age', drogas)
+
+#analise para questao 3
+analise_coluna_droga(df, 'Education', drogas)
+
+#analise para questao 4 
+analise_coluna_droga(df, 'Gender', drogas_alucinogenas)
+
+ #analise para questao 10
+analise_coluna_droga(df, 'Education', drogas_ilicitas)
+
+#analise para questao 13
+analise_coluna_droga(df, 'Country', drogas)
+
+# questao  

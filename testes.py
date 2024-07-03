@@ -1,7 +1,8 @@
-from scipy.stats import shapiro
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 
 # read_csv(caminho_para_o_documento) -> le o decumento .csv 
@@ -21,47 +22,5 @@ import seaborn as sns
 
 df = pd.read_csv('Drugs.csv')
 df.head()
-
-# funcao para pegar umca coluna e uma droga(exemplo: Gênero e Álcool) e calcular a média de consumo dessa coluna no dataframe
-def analise_coluna_droga(dataframe, coluna, droga):
-    valores_unicos = sorted(dataframe[coluna].unique(), key = lambda x: str(x))
-    media = 0
-    for val in valores_unicos:
-
-        dfval = df.loc[(df[coluna] == val), [coluna, droga]]
-        totalval = df.loc[(df[coluna] == val), coluna].count()
-
-        media = 0
-
-        totalval_6 = dfval.loc[dfval[droga] == "CL6"].shape[0]
-        media += totalval_6*6
-        totalval_5 = dfval.loc[dfval[droga] == "CL5"].shape[0]
-        media += totalval_5*5
-        totalval_4 = dfval.loc[dfval[droga] == "CL4"].shape[0]
-        media += totalval_4*4
-        totalval_3 = dfval.loc[dfval[droga] == "CL3"].shape[0]
-        media += totalval_3*3
-        totalval_2 = dfval.loc[dfval[droga] == "CL2"].shape[0]
-        media += totalval_2*2
-        totalval_1 = dfval.loc[dfval[droga] == "CL1"].shape[0]
-        media += totalval_1*1
-
-        media = media/totalval
-        print(f"A MEDIA DE CONSUMO DE {val} é {media:.2f}%" )
-
-analise_coluna_droga(df, 'Gender', 'Alcohol')
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
